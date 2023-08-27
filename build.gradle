@@ -11,13 +11,16 @@ repositories {
     mavenCentral()
 }
 
+def _group = 'com.craigburke.angular'
+def _version ='4.0.0'
+
 targetCompatibility = 1.7
-group = 'com.craigburke.angular'
-version = '2.4.0'
+group = "$_group"
+version = "$_version"
 
 dependencies {
-    provided 'com.bertramlabs.plugins:asset-pipeline-core:2.0.12'
-    provided 'org.codehaus.groovy:groovy-all:2.1.9'
+    provided 'com.bertramlabs.plugins:asset-pipeline-core:3.4.7'
+    provided 'org.codehaus.groovy:groovy-all:3.0.11'
     compile 'org.mozilla:rhino:1.7R4'
     compile 'com.googlecode.htmlcompressor:htmlcompressor:1.5.2'
 
@@ -25,7 +28,7 @@ dependencies {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '2.7'
+    gradleVersion = '3.0'
 }
 
 task sourcesJar(type: Jar) {
@@ -38,57 +41,27 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
     from 'build/docs/javadoc'
 }
 
-bintray {
-    user = project.hasProperty('bintrayUsername') ? project.bintrayUsername : ''
-    key = project.hasProperty('bintrayApiKey') ? project.bintrayApiKey : ''
-    publications = ['maven']
-
-    pkg {
-        repo = 'asset-pipeline'
-        userOrg = 'craigburke'
-        name = 'angular-template-asset-pipeline'
-        licenses = ['Apache-2.0']
+tasks.withType(GroovyCompile) {
+    configure(groovyOptions) {
+        forkOptions.jvmArgs = ['-Xmx1024m']
     }
-
 }
 
-
 publishing {
+    repositories {
+        maven {
+            url = 'file:///C:/EGS/proprietary.maven.dependencies'
+        }
+    }
     publications {
-        maven(MavenPublication) {
-            artifactId 'angular-template-asset-pipeline'
-            pom.withXml {
-                asNode().children().last() + {
-                    resolveStrategy = Closure.DELEGATE_FIRST
-                    name 'angular-template-asset-pipeline'
-                    description 'AngularJS Templates extension for the Asset Pipeline Library.'
-                    url 'https://github.com/craigburke/angular-template-asset-pipeline'
-                    scm {
-                        url 'https://github.com/craigburke/angular-template-asset-pipeline'
-                        connection 'scm:https://github.com/craigburke/angular-template-asset-pipeline.git'
-                        developerConnection 'scm:https://github.com/craigburke/angular-template-asset-pipeline.git'
-                    }
-                    licenses {
-                        license {
-                            name 'The Apache Software License, Version 2.0'
-                            url 'http://www.apache.org/license/LICENSE-2.0.txt'
-                            distribution 'repo'
-                        }
-                    }
-                    developers {
-                        developer {
-                            id 'craigburke'
-                            name 'Craig Burke'
-                            email 'craig@craigburke.com'
-                        }
-                    }
-                }
-            }
+        mavenJava(MavenPublication) {
+            groupId = "$_group"
+            artifactId = 'angular-template-asset-pipeline'
+            version = "$_version"
+
             from components.java
+
             artifact sourcesJar
-            artifact javadocJar
         }
     }
 }
-
-bintrayUpload.dependsOn build, sourcesJar, javadocJar

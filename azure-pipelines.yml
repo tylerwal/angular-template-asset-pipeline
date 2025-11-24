@@ -1,0 +1,17 @@
+# Azure Pipeline for angular-template-asset-pipeline
+# Gradle-based library deployment to Azure Artifacts
+
+# Disable automatic triggers - builds are triggered manually
+trigger: none
+
+pool:
+  name: 'EGS-Hosted'
+
+steps:
+- script: |
+    #!/bin/bash
+    source "/home/AdminEGSx1/.sdkman/bin/sdkman-init.sh"
+    sdk use groovy 3.0.13
+    cd $(Build.Repository.LocalPath)
+    ./gradlew clean build publish
+  displayName: 'Build and Deploy angular-template-asset-pipeline'
